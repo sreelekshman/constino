@@ -105,14 +105,14 @@ def response(message, history):
             yield partial
 
 constino = gr.ChatInterface(response,
-                 title='Constino: Constitutional Analysis Assistant',
-                 description='A legal analysis assistant that provides constitutional analysis based on the Indian Constitution.',
+                 title='Constino',
+                 description='An assistant that provides constitutional analysis of given scenarios.',
                  examples=[
-                     ["What are the fundamental rights of a citizen in India?"],
-                     ["What is the procedure for amending the Constitution?"],
-                     ["How does the Constitution ensure freedom of speech?"]
+                     ["What does Article 14 of the Indian Constitution guarantee?"],
+                     ["What is the composition of the Rajya Sabha?"],
+                     ["Can the state discriminate in public employment based on religion or gender? What does the Constitution say?"]
                  ],
-                 theme="default",
+                 theme=gr.themes.Glass(neutral_hue="zinc",text_size=gr.themes.sizes.text_md, font=[gr.themes.GoogleFont("Nunito Sans"), "Arial", "sans-serif"]),
                 ).launch(debug=True)
 
 if __name__ == "__main__":
