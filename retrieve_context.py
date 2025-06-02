@@ -9,7 +9,7 @@ def retrieve_context(query, part_threshold=0.75, max_parts=2, max_chunks=20):
     embed_model = SentenceTransformer("all-mpnet-base-v2")
 
     # Load the hierarchical rag_chunks
-    with open("rag_chunks_hierarchical2.json", "r") as f:
+    with open("rag_chunks_hierarchical.json", "r") as f:
         rag_chunks = json.load(f)
 
     selected_chunks = []
