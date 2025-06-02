@@ -1,7 +1,7 @@
 import gradio as gr
 import os
 
-from retrieve_context import retrieve_context
+from utils.retrieve_context import retrieve_context
 
 from openai import OpenAI
 
