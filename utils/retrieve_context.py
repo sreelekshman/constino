@@ -1,12 +1,11 @@
 from sentence_transformers import SentenceTransformer, util
-import torch
 import json
 from collections import defaultdict
 import re
 
 def retrieve_context(query, part_threshold=0.75, max_parts=2, max_chunks=20):
     # Load the embedding model
-    embed_model = SentenceTransformer("all-mpnet-base-v2")
+    embed_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
     # Load the hierarchical rag_chunks
     with open("rag_chunks_hierarchical.json", "r") as f:
@@ -121,18 +120,15 @@ def retrieve_context(query, part_threshold=0.75, max_parts=2, max_chunks=20):
             top_k_val = min(max(num_remaining_needed + 10, 1), len(individual_chunk_scores))
 
             if top_k_val > 0: # Ensure k is positive
-                top_scores, top_indices = torch.topk(individual_chunk_scores, k=top_k_val)
-            
-                for i_top in range(top_indices.size(0)):
+                # use util.semantic_search for top-k retrieval
+                hits = util.semantic_search(query_embedding, chunk_embeddings, top_k=top_k_val)[0]
+                for hit in hits:
                     if len(selected_chunks) >= max_chunks:
-                        break 
-
-                    chunk_idx = top_indices[i_top].item()
-                    
-                    if chunk_idx not in processed_indices: # Check if chunk already selected
+                        break
+                    chunk_idx = hit['corpus_id']
+                    score = hit['score']
+                    if chunk_idx not in processed_indices:
                         chunk_data = rag_chunks[chunk_idx]
-                        score = top_scores[i_top].item()
-                        
                         selected_chunks.append({
                             "part": chunk_data.get("part"),
                             "chapter": chunk_data.get("chapter"),

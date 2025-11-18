@@ -2,12 +2,17 @@ import gradio as gr
 import os
 
 from utils.retrieve_context import retrieve_context
+from ollama import Client
 
-from openai import OpenAI
+# from openai import OpenAI
 
-OPENAI_API_KEY = os.getenv('OPENAI_API')
+# OPENAI_API_KEY = os.getenv('OPENAI_API')
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+# client = OpenAI(api_key=OPENAI_API_KEY)
+
+client = Client(
+  host='http://192.168.0.127:11434'
+)
 
 system_prompt = """
 You are a legal analysis assistant specializing in the Indian Constitution. Your role is to provide thorough, well-structured, and insightful constitutional analysis of scenarios, drawing upon the provided constitutional texts. Your responses should be precise, neutral, and formal, but you are encouraged to elaborate on the scenario and its constitutional implications, offering clear explanations and context where appropriate.
@@ -90,18 +95,21 @@ def response(message, history):
     # Add the current user message
     messages.append({"role": "user", "content": prompt})
 
-    # Call OpenAI ChatCompletion API
-    response = client.chat.completions.create(
-        model="o4-mini",
+    # Call Ollama Chat API
+    response = client.chat(
+        model="llama3.2:1b",  # Replace with your Ollama model name if different
         messages=messages,
         stream=True,
+        options={"temperature": 0.2}
     )
 
     # Stream the response as it's generated
     partial = ""
     for chunk in response:
-        if chunk.choices and chunk.choices[0].delta.content:
-            partial += chunk.choices[0].delta.content
+        # Adjust the following line according to the actual Ollama client response structure
+        content = chunk.get("message", {}).get("content", "")
+        if content:
+            partial += content
             yield partial
 
 constino = gr.ChatInterface(response,
@@ -113,7 +121,4 @@ constino = gr.ChatInterface(response,
                      ["Can the state discriminate in public employment based on religion or gender? What does the Constitution say?"]
                  ],
                  theme=gr.themes.Glass(neutral_hue="zinc",text_size=gr.themes.sizes.text_md, font=[gr.themes.GoogleFont("Nunito Sans"), "Arial", "sans-serif"]),
-                ).launch(debug=True)
-
-if __name__ == "__main__":
-    constino.launch()
+                ).launch(server_name="0.0.0.0", server_port=7860,debug=True)
